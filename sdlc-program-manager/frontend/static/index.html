@@ -245,6 +245,145 @@
     margin-bottom: 0.65rem;
     line-height: 1.4;
   }
+
+  /* Graphical SDLC Pipeline Stepper */
+  .sdlc-stepper-wrap {
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.75rem 1rem 0.65rem 1rem;
+    margin-bottom: 0.75rem;
+  }
+  .sdlc-stepper-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.65rem;
+  }
+  .sdlc-stepper-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #475569;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .sdlc-current-stage-tag {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--accent);
+    background: #eff6ff;
+    padding: 0.15rem 0.55rem;
+    border-radius: 12px;
+    border: 1px solid #bfdbfe;
+  }
+  .sdlc-stepper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+  }
+  .sdlc-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+    min-width: 80px;
+  }
+  .sdlc-step-circle {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 2px solid #cbd5e1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.05rem;
+    color: #94a3b8;
+    transition: all 0.25s ease;
+  }
+  .sdlc-step-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+    margin-top: 0.35rem;
+    text-align: center;
+    transition: color 0.2s;
+  }
+  .sdlc-step-sub {
+    font-size: 0.65rem;
+    color: #94a3b8;
+    text-align: center;
+    margin-top: 1px;
+  }
+
+  /* Step States: Completed, Current, Upcoming */
+  .sdlc-step.completed .sdlc-step-circle {
+    background: #dcfce7;
+    border-color: #16a34a;
+    color: #16a34a;
+    box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.15);
+  }
+  .sdlc-step.completed .sdlc-step-label {
+    color: #15803d;
+    font-weight: 600;
+  }
+
+  .sdlc-step.current .sdlc-step-circle {
+    background: #eff6ff;
+    border-color: var(--accent);
+    color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(26, 115, 232, 0.2);
+    transform: scale(1.1);
+  }
+  .sdlc-step.current .sdlc-step-label {
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .sdlc-step.current-blocked .sdlc-step-circle {
+    background: #fee2e2;
+    border-color: var(--nogo-red);
+    color: var(--nogo-red);
+    box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.2);
+    transform: scale(1.1);
+  }
+  .sdlc-step.current-blocked .sdlc-step-label {
+    color: var(--nogo-red);
+    font-weight: 700;
+  }
+
+  .sdlc-step.upcoming .sdlc-step-circle {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    color: #94a3b8;
+  }
+
+  /* Connecting Track Line Between Steps */
+  .sdlc-connector {
+    flex: 1;
+    height: 3px;
+    background: #e2e8f0;
+    margin: 0 -8px 18px -8px;
+    position: relative;
+    z-index: 1;
+    border-radius: 2px;
+    transition: background 0.3s ease;
+  }
+  .sdlc-connector.completed {
+    background: #86efac;
+  }
+  .sdlc-connector.active {
+    background: linear-gradient(90deg, #86efac, var(--accent));
+  }
+  .sdlc-connector.blocked {
+    background: linear-gradient(90deg, #86efac, var(--nogo-red));
+  }
+
   .summary-sections-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -684,6 +823,20 @@
       </div>
       <div id="summary-desc" class="summary-desc">Project description goes here.</div>
       
+      <!-- Graphical SDLC Pipeline Stepper -->
+      <div class="sdlc-stepper-wrap">
+        <div class="sdlc-stepper-header">
+          <span class="sdlc-stepper-title">
+            <span class="material-symbols-outlined" style="font-size:1.05rem; color:var(--accent);">linear_scale</span>
+            SDLC Stage Progression
+          </span>
+          <span id="sdlc-stage-tag" class="sdlc-current-stage-tag">Requirements</span>
+        </div>
+        <div id="sdlc-stepper" class="sdlc-stepper">
+          <!-- Rendered dynamically by renderSdlcStepper() -->
+        </div>
+      </div>
+
       <div class="summary-sections-grid">
         <!-- What's holding the release -->
         <div class="summary-card-box blockers-box">
@@ -803,9 +956,101 @@ const summaryTasksTbody = document.getElementById("summary-tasks-tbody");
 const tasksCountBadge = document.getElementById("tasks-count-badge");
 const closeSummaryBtn = document.getElementById("close-summary-btn");
 const askAgentBtn = document.getElementById("ask-agent-about-project-btn");
+const sdlcStepper = document.getElementById("sdlc-stepper");
+const sdlcStageTag = document.getElementById("sdlc-stage-tag");
 
 let currentProjects = [];
 let activeProjectId = null;
+
+const SDLC_PIPELINE_STAGES = [
+  { key: "Requirements", label: "Requirements", icon: "article", desc: "PRD & Specs" },
+  { key: "Coding", label: "Coding", icon: "code", desc: "Implementation" },
+  { key: "Testing", label: "Testing", icon: "rule", desc: "QA & Verification" },
+  { key: "Deployment", label: "Deployment", icon: "rocket_launch", desc: "Prod Release" }
+];
+
+function renderSdlcStepper(stageName, isGo) {
+  sdlcStepper.innerHTML = "";
+  const currentStageNormalized = (stageName || "Requirements").trim().toLowerCase();
+  
+  // Find current stage index
+  let currentIndex = SDLC_PIPELINE_STAGES.findIndex(s => s.key.toLowerCase() === currentStageNormalized);
+  if (currentIndex === -1) currentIndex = 0;
+
+  sdlcStageTag.textContent = SDLC_PIPELINE_STAGES[currentIndex].label;
+  if (isGo && currentIndex === SDLC_PIPELINE_STAGES.length - 1) {
+    sdlcStageTag.textContent = "Deployment (Cleared for Release)";
+    sdlcStageTag.style.color = "#16a34a";
+    sdlcStageTag.style.borderColor = "#86efac";
+    sdlcStageTag.style.backgroundColor = "#dcfce7";
+  } else if (!isGo) {
+    sdlcStageTag.style.color = "#dc2626";
+    sdlcStageTag.style.borderColor = "#fca5a5";
+    sdlcStageTag.style.backgroundColor = "#fee2e2";
+  } else {
+    sdlcStageTag.style.color = "var(--accent)";
+    sdlcStageTag.style.borderColor = "#bfdbfe";
+    sdlcStageTag.style.backgroundColor = "#eff6ff";
+  }
+
+  SDLC_PIPELINE_STAGES.forEach((stage, idx) => {
+    // Stepper node
+    const stepEl = el("div", "sdlc-step");
+    let state = "upcoming";
+
+    if (idx < currentIndex) {
+      state = "completed";
+      stepEl.classList.add("completed");
+    } else if (idx === currentIndex) {
+      if (!isGo) {
+        state = "current-blocked";
+        stepEl.classList.add("current-blocked");
+      } else {
+        if (idx === SDLC_PIPELINE_STAGES.length - 1) {
+          state = "completed";
+          stepEl.classList.add("completed");
+        } else {
+          state = "current";
+          stepEl.classList.add("current");
+        }
+      }
+    } else {
+      stepEl.classList.add("upcoming");
+    }
+
+    const circle = el("div", "sdlc-step-circle");
+    if (state === "completed") {
+      circle.innerHTML = `<span class="material-symbols-outlined" style="font-size:1.15rem;">check</span>`;
+    } else if (state === "current-blocked") {
+      circle.innerHTML = `<span class="material-symbols-outlined" style="font-size:1.15rem;">error</span>`;
+    } else {
+      circle.innerHTML = `<span class="material-symbols-outlined" style="font-size:1.15rem;">${stage.icon}</span>`;
+    }
+
+    const label = el("div", "sdlc-step-label", stage.label);
+    const sub = el("div", "sdlc-step-sub", stage.desc);
+
+    stepEl.appendChild(circle);
+    stepEl.appendChild(label);
+    stepEl.appendChild(sub);
+    sdlcStepper.appendChild(stepEl);
+
+    // Connector line between steps
+    if (idx < SDLC_PIPELINE_STAGES.length - 1) {
+      const conn = el("div", "sdlc-connector");
+      if (idx < currentIndex) {
+        conn.classList.add("completed");
+      } else if (idx === currentIndex) {
+        if (!isGo) {
+          conn.classList.add("blocked");
+        } else {
+          conn.classList.add("active");
+        }
+      }
+      sdlcStepper.appendChild(conn);
+    }
+  });
+}
 
 // Lightbox modal handlers
 function openLightbox(src, alt) {
@@ -887,6 +1132,9 @@ async function selectProject(proj) {
   const isGo = (proj.status || "").toUpperCase() === "GO";
   summaryStatusBadge.textContent = isGo ? "GO" : "NO-GO";
   summaryStatusBadge.className = "status-badge-mini " + (isGo ? "go" : "nogo");
+
+  // Render graphical SDLC pipeline stepper
+  renderSdlcStepper(proj.stage, isGo);
 
   // Populate What's Holding the Release
   summaryHoldingList.innerHTML = "";
