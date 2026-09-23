@@ -13,9 +13,14 @@
     --accent: #1a73e8;
     --accent-hover: #1557b0;
     --bg: #f8fafc;
+    --sidebar-bg: #ffffff;
     --border: #e2e8f0;
     --text-primary: #1e293b;
     --text-muted: #64748b;
+    --go-green: #16a34a;
+    --go-bg: #dcfce7;
+    --nogo-red: #dc2626;
+    --nogo-bg: #fee2e2;
   }
   * { box-sizing: border-box; }
   body {
@@ -26,17 +31,19 @@
     display: flex;
     flex-direction: column;
     height: 100vh;
+    overflow: hidden;
   }
   header {
     background: var(--accent);
     color: #fff;
-    padding: 0.9rem 1.4rem;
+    padding: 0.85rem 1.4rem;
     font-weight: 700;
     font-size: 1.1rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    z-index: 10;
   }
   .header-badge {
     background: rgba(255,255,255,0.2);
@@ -45,11 +52,250 @@
     border-radius: 12px;
     font-weight: 500;
   }
+
+  /* Main Workspace Layout with Sidebar */
+  .app-container {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Left Projects Sidebar */
+  .sidebar {
+    width: 320px;
+    min-width: 280px;
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .sidebar-header {
+    padding: 1rem 1.1rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #fafafa;
+  }
+  .sidebar-title {
+    font-weight: 700;
+    font-size: 0.92rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #475569;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .refresh-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    border-radius: 4px;
+    padding: 3px;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s;
+  }
+  .refresh-btn:hover {
+    color: var(--accent);
+    background: #f1f5f9;
+  }
+  .sidebar-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .project-item {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.85rem;
+    cursor: pointer;
+    transition: all 0.15s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+  .project-item:hover {
+    border-color: #93c5fd;
+    box-shadow: 0 2px 6px rgba(37,99,235,0.08);
+    transform: translateY(-1px);
+  }
+  .project-item.active {
+    border-color: var(--accent);
+    background: #f0f7ff;
+    box-shadow: 0 0 0 1px var(--accent);
+  }
+  .project-item-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .project-item-name {
+    font-weight: 600;
+    font-size: 0.92rem;
+    color: #1e293b;
+    line-height: 1.25;
+  }
+  .project-item-stage {
+    font-size: 0.76rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .status-badge-mini {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.18rem 0.55rem;
+    border-radius: 12px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    flex-shrink: 0;
+  }
+  .status-badge-mini.go {
+    background: var(--go-bg);
+    color: var(--go-green);
+    border: 1px solid #86efac;
+  }
+  .status-badge-mini.nogo {
+    background: var(--nogo-bg);
+    color: var(--nogo-red);
+    border: 1px solid #fca5a5;
+  }
+
+  /* Right / Main Chat Area */
+  .chat-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    background: var(--bg);
+  }
+
+  /* Project Summary Banner (when a project is selected) */
+  .project-summary-panel {
+    background: #ffffff;
+    border-bottom: 2px solid var(--border);
+    padding: 1rem 1.4rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    display: none;
+    max-height: 280px;
+    overflow-y: auto;
+    animation: slideDown 0.2s ease-out;
+    z-index: 5;
+  }
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .summary-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+  .summary-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .summary-title {
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: #0f172a;
+  }
+  .summary-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: 1.25rem;
+    line-height: 1;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  .summary-close:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+  }
+  .summary-desc {
+    font-size: 0.85rem;
+    color: #475569;
+    margin-bottom: 0.75rem;
+    line-height: 1.4;
+  }
+  .summary-sections-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.85rem;
+    margin-top: 0.4rem;
+  }
+  .summary-card-box {
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.65rem 0.85rem;
+    font-size: 0.82rem;
+  }
+  .summary-card-box.blockers-box {
+    border-left: 4px solid var(--nogo-red);
+    background: #fffafa;
+  }
+  .summary-card-box.nextsteps-box {
+    border-left: 4px solid var(--go-green);
+    background: #f8fdf9;
+  }
+  .summary-box-title {
+    font-weight: 700;
+    margin-bottom: 0.35rem;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .summary-box-list {
+    margin: 0;
+    padding-left: 1.15rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    color: #334155;
+  }
+  .ask-agent-chip-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 0.6rem;
+    background: #eff6ff;
+    color: var(--accent);
+    border: 1px solid #bfdbfe;
+    border-radius: 14px;
+    padding: 0.25rem 0.7rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .ask-agent-chip-btn:hover {
+    background: #dbeafe;
+    transform: translateY(-1px);
+  }
+
   #log {
     flex: 1;
     overflow-y: auto;
     padding: 1.2rem;
-    max-width: 820px;
+    max-width: 860px;
     width: 100%;
     margin: 0 auto;
   }
@@ -113,7 +359,7 @@
     flex-wrap: wrap;
     gap: 0.5rem;
     padding: 0.5rem 1.2rem;
-    max-width: 820px;
+    max-width: 860px;
     width: 100%;
     margin: 0 auto;
   }
@@ -147,7 +393,7 @@
   form {
     display: flex;
     gap: 0.6rem;
-    max-width: 820px;
+    max-width: 860px;
     margin: 0 auto;
   }
   input {
@@ -160,123 +406,137 @@
     transition: border-color 0.2s;
   }
   input:focus { border-color: var(--accent); }
-  button {
-    padding: 0.75rem 1.3rem;
-    border: none;
-    border-radius: 10px;
+  button#send-btn {
     background: var(--accent);
     color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 0 1.2rem;
     font-weight: 600;
     cursor: pointer;
-    transition: background 0.15s;
+    transition: background 0.2s;
     display: flex;
     align-items: center;
-    gap: 0.3rem;
+    gap: 0.35rem;
   }
-  button:hover { background: var(--accent-hover); }
-  button:disabled { opacity: 0.6; cursor: not-allowed; }
+  button#send-btn:hover { background: var(--accent-hover); }
+  button:disabled, input:disabled { opacity: 0.6; cursor: not-allowed; }
 
-  /* --- A2UI component styles (Card, Column, Row, Text, Divider, List, Image, Icon) --- */
-  .a2card {
+  /* A2UI BasicCatalog Cards styling */
+  .a2ui-card {
+    background: #fff;
     border: 1px solid var(--border);
     border-radius: 12px;
     padding: 1.1rem;
-    background: #fff;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
-    max-width: 100%;
+    margin: 0.5rem 0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
   }
-  .a2card + .a2card, .a2col > .a2card { margin-top: 0.75rem; }
-  .a2col { display: flex; flex-direction: column; gap: 0.45rem; }
-  .a2row { display: flex; flex-direction: row; gap: 0.6rem; align-items: center; flex-wrap: wrap; }
-  .a2row.between { justify-content: space-between; }
-  .a2text { margin: 0; line-height: 1.45; }
-  .a2text.a2-h1 { font-size: 1.5rem; font-weight: 700; color: #0f172a; }
-  .a2text.a2-h2 { font-size: 1.25rem; font-weight: 700; color: #1e293b; }
-  .a2text.a2-h3 { font-size: 1.05rem; font-weight: 600; color: #1e293b; }
-  .a2text.a2-h4 { font-size: 0.95rem; font-weight: 600; color: #334155; }
-  .a2text.a2-caption { font-size: 0.85rem; color: #64748b; }
-  .a2divider { border: none; border-top: 1px solid var(--border); margin: 0.4rem 0; width: 100%; }
+  .a2ui-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+  }
+  .a2ui-col {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .a2ui-h1 { font-size: 1.15rem; font-weight: 700; margin: 0.2rem 0; color: #0f172a; }
+  .a2ui-h2 { font-size: 1rem; font-weight: 600; margin: 0.2rem 0; color: #1e293b; }
+  .a2ui-body { font-size: 0.9rem; color: #334155; line-height: 1.5; margin: 0.1rem 0; }
+  .a2ui-caption { font-size: 0.75rem; color: var(--text-muted); }
   
-  /* Clickable A2UI diagram images with zoom overlay hint */
-  .a2img-container {
-    position: relative;
-    display: inline-block;
-    cursor: zoom-in;
-    margin: 0.4rem 0;
-    max-width: 100%;
-  }
-  .a2img {
-    max-width: 100%;
-    border-radius: 8px;
-    display: block;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.08);
-    transition: transform 0.2s ease;
-  }
-  .a2img-container:hover .a2img { transform: scale(1.01); }
-  .zoom-hint {
-    position: absolute;
-    bottom: 8px;
-    right: 8px;
-    background: rgba(0,0,0,0.65);
+  .a2ui-btn {
+    background: var(--accent);
     color: #fff;
-    font-size: 0.72rem;
-    padding: 0.2rem 0.5rem;
+    border: none;
     border-radius: 6px;
-    pointer-events: none;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+    font-weight: 500;
   }
+  .a2ui-btn:hover { background: var(--accent-hover); }
 
-  .material-symbols-outlined {
-    font-family: 'Material Symbols Outlined';
-    font-size: 1.25rem;
-    line-height: 1;
-    vertical-align: middle;
-    color: var(--accent);
-  }
-
-  /* SDLC Status & Priority Badges */
-  .sdlc-badge {
+  /* SDLC Status Badges */
+  .badge-status {
     display: inline-flex;
     align-items: center;
-    gap: 0.25rem;
-    padding: 0.15rem 0.55rem;
+    gap: 0.3rem;
+    padding: 0.2rem 0.6rem;
     border-radius: 12px;
     font-size: 0.75rem;
     font-weight: 600;
-    margin: 0.1rem 0.2rem;
-    vertical-align: middle;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
   }
-  .badge-status-completed { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
-  .badge-status-inprogress { background: #e0f2fe; color: #075985; border: 1px solid #bae6fd; }
-  .badge-status-pending { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
-  .badge-status-blocked { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+  .badge-status.completed {
+    background: #dcfce7;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+  }
+  .badge-status.in-progress {
+    background: #dbeafe;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+  }
+  .badge-status.pending {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+  }
+  .badge-status.blocked {
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+  }
 
-  .badge-priority-high { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
-  .badge-priority-medium { background: #ffedd5; color: #c2410c; border: 1px solid #fed7aa; }
-  .badge-priority-low { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
-
-  /* Decision Pills for GO / NO-GO */
-  .badge-decision-go {
-    background: #16a34a;
-    color: #ffffff;
-    font-size: 0.82rem;
+  /* SDLC Priority Badges */
+  .badge-priority {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.15rem 0.5rem;
+    border-radius: 6px;
+    font-size: 0.72rem;
     font-weight: 700;
-    padding: 0.2rem 0.75rem;
-    border-radius: 14px;
-    letter-spacing: 0.04em;
-    box-shadow: 0 1px 3px rgba(22,163,74,0.3);
+    text-transform: uppercase;
   }
-  .badge-decision-nogo {
-    background: #dc2626;
-    color: #ffffff;
-    font-size: 0.82rem;
-    font-weight: 700;
-    padding: 0.2rem 0.75rem;
-    border-radius: 14px;
-    letter-spacing: 0.04em;
-    box-shadow: 0 1px 3px rgba(220,38,38,0.3);
+  .badge-priority.critical {
+    background: #7f1d1d;
+    color: #fef2f2;
+  }
+  .badge-priority.high {
+    background: #fef3c7;
+    color: #b45309;
+    border: 1px solid #fde68a;
+  }
+  .badge-priority.medium {
+    background: #e0f2fe;
+    color: #0369a1;
+    border: 1px solid #bae6fd;
+  }
+  .badge-priority.low {
+    background: #f8fafc;
+    color: #64748b;
+    border: 1px solid #cbd5e1;
   }
 
-  /* Lightbox Modal */
+  /* Expandable Diagram / Image Lightbox */
+  .diagram-thumbnail {
+    cursor: zoom-in;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    max-width: 100%;
+    max-height: 280px;
+    object-fit: cover;
+  }
+  .diagram-thumbnail:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  }
+
   .lightbox-modal {
     display: none;
     position: fixed;
@@ -285,18 +545,17 @@
     top: 0;
     width: 100%;
     height: 100%;
-    background: rgba(15, 23, 42, 0.85);
+    background-color: rgba(15, 23, 42, 0.85);
     backdrop-filter: blur(4px);
     justify-content: center;
     align-items: center;
-    padding: 2rem;
+    flex-direction: column;
   }
   .lightbox-content {
-    max-width: 90vw;
-    max-height: 85vh;
-    border-radius: 10px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-    object-fit: contain;
+    max-width: 90%;
+    max-height: 85%;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
   }
   .lightbox-close {
     position: absolute;
@@ -331,24 +590,94 @@
   <div class="header-badge">A2UI 0.8 &bull; Agent Runtime</div>
 </header>
 
-<div id="log"></div>
+<div class="app-container">
+  <!-- Left Sidebar for Projects -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <span class="sidebar-title">
+        <span class="material-symbols-outlined" style="font-size:1.15rem; color:#475569;">account_tree</span>
+        SDLC Projects
+      </span>
+      <button id="refresh-projects-btn" class="refresh-btn" title="Refresh project statuses">
+        <span class="material-symbols-outlined" style="font-size:1.1rem;">refresh</span>
+      </button>
+    </div>
+    <div id="projects-list" class="sidebar-list">
+      <div style="padding: 1rem; color: #64748b; font-size: 0.82rem; text-align: center;">
+        Loading projects...
+      </div>
+    </div>
+  </aside>
 
-<!-- Quick-action suggestion chips -->
-<div class="quick-chips">
-  <div class="chip" data-msg="List all SDLC tasks">📋 List SDLC Tasks</div>
-  <div class="chip" data-msg="Evaluate release readiness for production">🚦 Release Readiness Gate</div>
-  <div class="chip" data-msg="Check GitHub repository health for google/adk-python">🐙 GitHub Repo Health</div>
-  <div class="chip" data-msg="Generate architecture diagram for our microservices checkout flow">📊 Architecture Diagram</div>
-</div>
+  <!-- Right Main Chat & Summary Area -->
+  <main class="chat-area">
+    <!-- Top Project Summary & Blocker Breakdown Panel -->
+    <div id="project-summary-panel" class="project-summary-panel">
+      <div class="summary-header">
+        <div class="summary-title-wrap">
+          <span id="summary-project-name" class="summary-title">Project Name</span>
+          <span id="summary-status-badge" class="status-badge-mini">STATUS</span>
+          <span id="summary-score-badge" style="font-size:0.75rem; color:#64748b; background:#f1f5f9; padding:0.15rem 0.5rem; border-radius:10px;">0%</span>
+        </div>
+        <button id="close-summary-btn" class="summary-close" title="Close summary">&times;</button>
+      </div>
+      <div id="summary-desc" class="summary-desc">Project description goes here.</div>
+      
+      <div class="summary-sections-grid">
+        <!-- What's holding the release -->
+        <div class="summary-card-box blockers-box">
+          <div class="summary-box-title" style="color: var(--nogo-red);">
+            <span class="material-symbols-outlined" style="font-size:1.05rem;">block</span>
+            What's Holding the Release
+          </div>
+          <ul id="summary-holding-list" class="summary-box-list">
+            <li>No active blockers detected.</li>
+          </ul>
+        </div>
 
-<div class="input-container">
-  <form id="form">
-    <input id="input" placeholder="Ask SDLC Program Manager or click a quick prompt…" autocomplete="off" autofocus>
-    <button id="send-btn">
-      <span class="material-symbols-outlined" style="font-size:1.15rem; color:#fff;">send</span>
-      <span>Send</span>
-    </button>
-  </form>
+        <!-- Next Steps -->
+        <div class="summary-card-box nextsteps-box">
+          <div class="summary-box-title" style="color: var(--go-green);">
+            <span class="material-symbols-outlined" style="font-size:1.05rem;">arrow_circle_right</span>
+            Next Steps
+          </div>
+          <ul id="summary-nextsteps-list" class="summary-box-list">
+            <li>Review initiative deliverables.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <button id="ask-agent-about-project-btn" class="ask-agent-chip-btn">
+          <span class="material-symbols-outlined" style="font-size:0.95rem;">chat</span>
+          <span>Ask Agent to resolve blockers for this project</span>
+        </button>
+        <span style="font-size:0.75rem; color:#94a3b8;">Click any project on the left to inspect</span>
+      </div>
+    </div>
+
+    <!-- Chat messages stream -->
+    <div id="log"></div>
+
+    <!-- Quick-action suggestion chips -->
+    <div class="quick-chips">
+      <div class="chip" data-msg="List all SDLC tasks">📋 List SDLC Tasks</div>
+      <div class="chip" data-msg="Evaluate release readiness for production">🚦 Release Readiness Gate</div>
+      <div class="chip" data-msg="Check GitHub repository health for google/adk-python">🐙 GitHub Repo Health</div>
+      <div class="chip" data-msg="Generate architecture diagram for our microservices checkout flow">📊 Architecture Diagram</div>
+    </div>
+
+    <!-- Message input -->
+    <div class="input-container">
+      <form id="form">
+        <input id="input" placeholder="Ask SDLC Program Manager or click a quick prompt…" autocomplete="off" autofocus>
+        <button id="send-btn">
+          <span class="material-symbols-outlined" style="font-size:1.15rem; color:#fff;">send</span>
+          <span>Send</span>
+        </button>
+      </form>
+    </div>
+  </main>
 </div>
 
 <!-- Lightbox Modal for expandable architecture diagrams -->
@@ -368,6 +697,22 @@ const lightboxImg = document.getElementById("lightbox-img");
 const lightboxCaption = document.getElementById("lightbox-caption");
 const lightboxClose = document.getElementById("lightbox-close");
 
+// Sidebar & Summary elements
+const projectsListEl = document.getElementById("projects-list");
+const refreshProjectsBtn = document.getElementById("refresh-projects-btn");
+const projectSummaryPanel = document.getElementById("project-summary-panel");
+const summaryProjectName = document.getElementById("summary-project-name");
+const summaryStatusBadge = document.getElementById("summary-status-badge");
+const summaryScoreBadge = document.getElementById("summary-score-badge");
+const summaryDesc = document.getElementById("summary-desc");
+const summaryHoldingList = document.getElementById("summary-holding-list");
+const summaryNextstepsList = document.getElementById("summary-nextsteps-list");
+const closeSummaryBtn = document.getElementById("close-summary-btn");
+const askAgentBtn = document.getElementById("ask-agent-about-project-btn");
+
+let currentProjects = [];
+let activeProjectId = null;
+
 // Lightbox modal handlers
 function openLightbox(src, alt) {
   lightboxImg.src = src;
@@ -377,247 +722,274 @@ function openLightbox(src, alt) {
 lightboxClose.onclick = () => { lightbox.style.display = "none"; };
 lightbox.onclick = (e) => { if (e.target === lightbox) lightbox.style.display = "none"; };
 
+// Close summary panel
+closeSummaryBtn.onclick = () => {
+  projectSummaryPanel.style.display = "none";
+  document.querySelectorAll(".project-item").forEach(p => p.classList.remove("active"));
+  activeProjectId = null;
+};
+
 function el(tag, cls, text) {
-  const e = document.createElement(tag);
-  if (cls) e.className = cls;
-  if (text != null) e.textContent = text;
-  return e;
+  const node = document.createElement(tag);
+  if (cls) node.className = cls;
+  if (text !== undefined) node.textContent = text;
+  return node;
 }
 
-function bubble(who) {
-  const m = el("div", "msg " + who);
+// Fetch and render projects in the left sidebar
+async function loadProjects() {
+  try {
+    const res = await fetch("/api/projects");
+    const data = await res.json();
+    currentProjects = data.projects || [];
+    renderProjectsSidebar();
+  } catch (err) {
+    console.error("Failed to load projects:", err);
+    projectsListEl.innerHTML = `<div style="padding:1rem;color:#dc2626;font-size:0.8rem;text-align:center;">Failed to load projects</div>`;
+  }
+}
+
+function renderProjectsSidebar() {
+  projectsListEl.innerHTML = "";
+  if (currentProjects.length === 0) {
+    projectsListEl.innerHTML = `<div style="padding:1rem;color:#64748b;font-size:0.82rem;text-align:center;">No SDLC projects found</div>`;
+    return;
+  }
+
+  currentProjects.forEach(proj => {
+    const item = el("div", "project-item" + (proj.id === activeProjectId ? " active" : ""));
+    item.setAttribute("data-id", proj.id);
+
+    const top = el("div", "project-item-top");
+    const name = el("div", "project-item-name", proj.name);
+    
+    const isGo = (proj.status || "").toUpperCase() === "GO";
+    const statusBadge = el("span", "status-badge-mini " + (isGo ? "go" : "nogo"), isGo ? "GO" : "NO-GO");
+    top.appendChild(name);
+    top.appendChild(statusBadge);
+
+    const stageWrap = el("div", "project-item-stage");
+    stageWrap.innerHTML = `<span class="material-symbols-outlined" style="font-size:0.85rem;">folder</span> Stage: <strong>${proj.stage || 'SDLC'}</strong> &bull; Progress: ${proj.completion_score || '0%'}`;
+
+    item.appendChild(top);
+    item.appendChild(stageWrap);
+
+    item.onclick = () => selectProject(proj);
+    projectsListEl.appendChild(item);
+  });
+}
+
+function selectProject(proj) {
+  activeProjectId = proj.id;
+  document.querySelectorAll(".project-item").forEach(el => {
+    el.classList.toggle("active", el.getAttribute("data-id") === proj.id);
+  });
+
+  // Populate Summary Panel
+  summaryProjectName.textContent = proj.name;
+  summaryDesc.textContent = proj.description || "";
+  summaryScoreBadge.textContent = proj.completion_score ? `${proj.completion_score} complete` : "In Progress";
+
+  const isGo = (proj.status || "").toUpperCase() === "GO";
+  summaryStatusBadge.textContent = isGo ? "GO" : "NO-GO";
+  summaryStatusBadge.className = "status-badge-mini " + (isGo ? "go" : "nogo");
+
+  // Populate What's Holding the Release
+  summaryHoldingList.innerHTML = "";
+  const blockers = proj.holding_release || [];
+  if (blockers.length === 0) {
+    const li = el("li", "", "All release criteria met. No active blockers holding release!");
+    li.style.color = "#15803d";
+    summaryHoldingList.appendChild(li);
+  } else {
+    blockers.forEach(b => {
+      summaryHoldingList.appendChild(el("li", "", b));
+    });
+  }
+
+  // Populate Next Steps
+  summaryNextstepsList.innerHTML = "";
+  const steps = proj.next_steps || [];
+  if (steps.length === 0) {
+    summaryNextstepsList.appendChild(el("li", "", "Evaluate next sprint backlog deliverables."));
+  } else {
+    steps.forEach(s => {
+      summaryNextstepsList.appendChild(el("li", "", s));
+    });
+  }
+
+  // Configure "Ask Agent" button
+  askAgentBtn.onclick = () => {
+    if (isGo) {
+      sendMessage(`What are the next deployment steps to promote project ${proj.name} to 100% production traffic?`);
+    } else {
+      sendMessage(`Evaluate project "${proj.name}" (${proj.id}). What is currently holding the release and what specific tasks need to be completed to reach a GO decision?`);
+    }
+  };
+
+  projectSummaryPanel.style.display = "block";
+}
+
+refreshProjectsBtn.onclick = () => {
+  loadProjects();
+};
+
+function bubble(role) {
+  const row = el("div", "msg " + role);
   const b = el("div", "bubble");
-  m.appendChild(b);
-  log.appendChild(m);
+  row.appendChild(b);
+  log.appendChild(row);
   log.scrollTop = log.scrollHeight;
   return b;
 }
 
-/* ----------------------------------------------------------------------------
- * Helper: Format Text with SDLC Badges (Status, Priority, GO / NO-GO)
- * -------------------------------------------------------------------------- */
-function formatSdlcBadges(container, rawText) {
-  // Regex to detect Status, Priority, and GO / NO-GO decisions
-  const regex = /(Status:\s*(Completed|In Progress|Pending|Blocked)|Priority:\s*(High|Medium|Low)|\b(NO-GO|GO)\b)/gi;
-  if (!regex.test(rawText)) {
-    container.textContent = rawText;
-    return;
+// A2UI Component Renderer with Status and Priority Badges
+function renderA2UIComponent(c, dataCtx) {
+  if (!c) return null;
+
+  // Text Component
+  if (c.Text) {
+    const val = resolveBinding(c.Text.text, dataCtx);
+    const usage = c.Text.usage || "body";
+    let cls = "a2ui-body";
+    if (usage === "h1") cls = "a2ui-h1";
+    else if (usage === "h2") cls = "a2ui-h2";
+    else if (usage === "caption") cls = "a2ui-caption";
+
+    const textEl = el("div", cls, val);
+
+    // Decorate status badges
+    const lowerVal = (val || "").toLowerCase();
+    if (["completed", "in progress", "pending", "blocked"].includes(lowerVal)) {
+      textEl.className = `badge-status ${lowerVal.replace(/\s+/g, '-')}`;
+    } else if (["critical", "high", "medium", "low"].includes(lowerVal)) {
+      textEl.className = `badge-priority ${lowerVal}`;
+    }
+    return textEl;
   }
 
-  let lastIndex = 0;
-  regex.lastIndex = 0;
-  let match;
-  while ((match = regex.exec(rawText)) !== null) {
-    if (match.index > lastIndex) {
-      container.appendChild(document.createTextNode(rawText.substring(lastIndex, match.index)));
-    }
-    const fullMatch = match[0];
-    const statusVal = match[2];
-    const priorityVal = match[3];
-    const decisionVal = match[4];
+  // Image Component with Lightbox click handler
+  if (c.Image) {
+    const url = resolveBinding(c.Image.url, dataCtx);
+    const alt = resolveBinding(c.Image.alt, dataCtx) || "Architecture Diagram";
+    const img = el("img", "diagram-thumbnail");
+    img.src = url;
+    img.alt = alt;
+    img.title = "Click to enlarge in Lightbox";
+    img.onclick = () => openLightbox(url, alt);
+    return img;
+  }
 
-    const span = document.createElement("span");
-    span.className = "sdlc-badge";
-    if (statusVal) {
-      const sKey = statusVal.toLowerCase().replace(/\s+/g, "");
-      span.classList.add("badge-status-" + sKey);
-      span.textContent = fullMatch;
-    } else if (priorityVal) {
-      const pKey = priorityVal.toLowerCase();
-      span.classList.add("badge-priority-" + pKey);
-      span.textContent = fullMatch;
-    } else if (decisionVal) {
-      const dKey = decisionVal.toUpperCase() === "NO-GO" ? "nogo" : "go";
-      span.classList.add("badge-decision-" + dKey);
-      span.textContent = fullMatch.toUpperCase();
-    }
-    container.appendChild(span);
-    lastIndex = regex.lastIndex;
+  // Row Component
+  if (c.Row) {
+    const rowEl = el("div", "a2ui-row");
+    (c.Row.children || []).forEach(child => {
+      const childNode = renderA2UIComponent(child, dataCtx);
+      if (childNode) rowEl.appendChild(childNode);
+    });
+    return rowEl;
   }
-  if (lastIndex < rawText.length) {
-    container.appendChild(document.createTextNode(rawText.substring(lastIndex)));
+
+  // Column Component
+  if (c.Column) {
+    const colEl = el("div", "a2ui-col");
+    (c.Column.children || []).forEach(child => {
+      const childNode = renderA2UIComponent(child, dataCtx);
+      if (childNode) colEl.appendChild(childNode);
+    });
+    return colEl;
   }
+
+  // Card Component
+  if (c.Card) {
+    const cardEl = el("div", "a2ui-card");
+    const childNode = renderA2UIComponent(c.Card.child, dataCtx);
+    if (childNode) cardEl.appendChild(childNode);
+    return cardEl;
+  }
+
+  // Button Component
+  if (c.Button) {
+    const label = resolveBinding(c.Button.label, dataCtx) || "Action";
+    const btn = el("button", "a2ui-btn", label);
+    return btn;
+  }
+
+  return null;
 }
 
-/* ----------------------------------------------------------------------------
- * A2UI mini-renderer (v0.8 Basic Catalog subset).
- * -------------------------------------------------------------------------- */
-function boundStr(v) {
-  if (v == null) return "";
-  if (typeof v === "string") return v;
-  if (typeof v.literalString === "string") return v.literalString;
-  return "";
+function resolveBinding(val, dataCtx) {
+  if (typeof val !== "string") return val;
+  if (val.startsWith("${") && val.endsWith("}")) {
+    const path = val.slice(2, -1).trim();
+    return getNestedValue(dataCtx, path);
+  }
+  return val;
 }
 
-function childIds(props) {
-  const ids = [];
-  if (props && typeof props.child === "string") ids.push(props.child);
-  const ch = props && props.children;
-  if (ch && Array.isArray(ch.explicitList)) {
-    for (const c of ch.explicitList) if (typeof c === "string") ids.push(c);
-  }
-  return ids;
+function getNestedValue(obj, path) {
+  if (!obj || !path) return "";
+  return path.split('.').reduce((acc, part) => (acc && acc[part] !== undefined ? acc[part] : ""), obj);
 }
 
-function iconName(n) {
-  return String(n || "").replace(/([a-z0-9])([A-Z])/g, "$1_$2").replace(/\s+/g, "_").toLowerCase();
-}
+function renderReply(bubbleEl, parts) {
+  bubbleEl.textContent = "";
 
-function buildNode(id, comps, seen) {
-  if (!id || seen.has(id)) return null;
-  seen.add(id);
-  const spec = comps[id];
-  if (!spec || typeof spec !== "object") return null;
-  const type = Object.keys(spec)[0];
-  const props = spec[type] || {};
-  const kids = () => childIds(props).map(cid => buildNode(cid, comps, seen)).filter(Boolean);
+  for (const p of parts) {
+    if (p.kind === "text") {
+      const mdDiv = el("div", "markdown-content");
+      let formattedText = marked.parse(p.text || "");
 
-  switch (type) {
-    case "Card": {
-      const d = el("div", "a2card");
-      kids().forEach(n => d.appendChild(n));
-      return d;
-    }
-    case "Column":
-    case "List": {
-      const horizontal = type === "List" && props.direction === "horizontal";
-      const d = el("div", horizontal ? "a2row" : "a2col");
-      kids().forEach(n => d.appendChild(n));
-      return d;
-    }
-    case "Row": {
-      const d = el("div", "a2row" + (props.distribution === "spaceBetween" ? " between" : ""));
-      kids().forEach(n => d.appendChild(n));
-      return d;
-    }
-    case "Text": {
-      const t = el("div", "a2text");
-      const hint = String(props.usageHint || "body").toLowerCase();
-      if (["h1", "h2", "h3", "h4", "h5", "h6"].includes(hint)) t.classList.add("a2-" + hint);
-      else if (hint === "caption") t.classList.add("a2-caption");
-      
-      const strVal = boundStr(props.text);
-      formatSdlcBadges(t, strVal);
-      return t;
-    }
-    case "Divider":
-      return el("hr", "a2divider");
-    case "Image": {
-      const src = boundStr(props.url || props.src);
-      if (!/^https?:\/\//i.test(src)) return null;
-      const alt = boundStr(props.alt) || "Architecture Diagram";
-      
-      const wrap = el("div", "a2img-container");
-      const img = el("img", "a2img");
-      img.src = src;
-      img.alt = alt;
-      const hint = el("span", "zoom-hint", "🔍 Click to expand");
-      wrap.appendChild(img);
-      wrap.appendChild(hint);
-      wrap.onclick = () => openLightbox(src, alt);
-      return wrap;
-    }
-    case "Icon": {
-      const s = el("span", "material-symbols-outlined");
-      s.textContent = iconName(boundStr(props.name) || props.name);
-      return s;
-    }
-    default:
-      return null;
-  }
-}
-
-function renderSurface(messages, container) {
-  const comps = {};
-  const roots = [];
-  for (const m of messages) {
-    if (m.beginRendering && typeof m.beginRendering.root === "string") roots.push(m.beginRendering.root);
-    const su = m.surfaceUpdate;
-    if (su && Array.isArray(su.components)) {
-      for (const c of su.components) if (c && c.id && c.component) comps[c.id] = c.component;
-    }
-  }
-  let rootIds = roots.filter(r => comps[r]);
-  if (rootIds.length === 0) {
-    const referenced = new Set();
-    for (const id in comps) {
-      const spec = comps[id];
-      childIds(spec[Object.keys(spec)[0]] || {}).forEach(c => referenced.add(c));
-    }
-    rootIds = Object.keys(comps).filter(id => !referenced.has(id));
-  }
-  let drew = false;
-  for (const rid of rootIds) {
-    const node = buildNode(rid, comps, new Set());
-    if (node) { container.appendChild(node); drew = true; }
-  }
-  return drew;
-}
-
-function flattenText(messages) {
-  const out = [];
-  for (const m of messages) {
-    const su = m.surfaceUpdate;
-    if (su && Array.isArray(su.components)) {
-      for (const c of su.components) if (c && c.component && c.component.Text) out.push(boundStr(c.component.Text.text));
-    }
-  }
-  return out.join("\n").trim();
-}
-
-function renderReply(b, parts) {
-  b.textContent = "";
-  const texts = parts.filter(p => p && (p.kind === "text" || (!p.kind && p.text))).map(p => p.text || "");
-  const a2ui = parts.filter(p => p && p.kind === "a2ui" && p.data).map(p => p.data);
-
-  const textStr = texts.join("\n").trim();
-  if (textStr) {
-    const mdDiv = el("div", "markdown-content");
-    if (typeof marked !== "undefined" && marked.parse) {
-      let parsedHtml = marked.parse(textStr);
-      parsedHtml = parsedHtml.replace(/(NO[- ]GO|\bGO\b(?!\s+(?:to|ahead|back|with|for|through|on)))/gi, (m) => {
-        if (/^no[- ]go$/i.test(m)) {
-          return `<span class="sdlc-badge badge-decision-nogo">NO-GO</span>`;
-        } else if (/^go$/i.test(m)) {
-          return `<span class="sdlc-badge badge-decision-go">GO</span>`;
+      // Enhanced styling for GO and NO-GO release gate status pills
+      formattedText = formattedText.replace(
+        /(NO[- ]GO|\bGO\b(?!\s+(?:to|ahead|back|with|for|through|on)))/gi,
+        (match) => {
+          const isNoGo = /NO[- ]GO/i.test(match);
+          const color = isNoGo ? '#dc2626' : '#16a34a';
+          const bg = isNoGo ? '#fee2e2' : '#dcfce7';
+          const border = isNoGo ? '#fca5a5' : '#86efac';
+          const label = isNoGo ? 'NO-GO' : 'GO';
+          return `<span style="display:inline-block; font-weight:700; font-size:0.82em; padding:2px 8px; border-radius:12px; background:${bg}; color:${color}; border:1px solid ${border}; vertical-align:middle; margin:0 2px;">${label}</span>`;
         }
-        return m;
-      });
-      mdDiv.innerHTML = parsedHtml;
+      );
+
+      mdDiv.innerHTML = formattedText;
+
+      // Attach lightbox handler to any markdown-rendered images
       mdDiv.querySelectorAll("img").forEach(img => {
-        img.style.cursor = "zoom-in";
+        img.classList.add("diagram-thumbnail");
+        img.title = "Click to enlarge in Lightbox";
         img.onclick = () => openLightbox(img.src, img.alt);
       });
-    } else {
-      mdDiv.textContent = textStr;
+
+      bubbleEl.appendChild(mdDiv);
+    } else if (p.kind === "a2ui") {
+      bubbleEl.classList.add("rich");
+      const a2uiData = p.data;
+      if (!a2uiData) continue;
+
+      let payload = a2uiData;
+      if (payload.beginRendering) payload = payload.beginRendering;
+      if (payload.surfaceUpdate) payload = payload.surfaceUpdate;
+
+      const comp = payload.component || payload.rootComponent || payload.card;
+      const dataCtx = payload.data || {};
+
+      const renderedNode = renderA2UIComponent(comp, dataCtx);
+      if (renderedNode) bubbleEl.appendChild(renderedNode);
     }
-    b.appendChild(mdDiv);
   }
 
-  if (a2ui.length) {
-    b.classList.add("rich");
-    if (!renderSurface(a2ui, b)) {
-      b.appendChild(el("div", null, flattenText(a2ui) || "(no card content)"));
-    }
-  }
-  if (!b.childNodes.length) b.textContent = "(no response)";
-  log.scrollTop = log.scrollHeight;
+  // Refresh projects sidebar when agent finishes answering in case task/status changed
+  loadProjects();
 }
 
-/* ----------------------------------------------------------------------------
- * Chat Submission & Quick Chips
- * -------------------------------------------------------------------------- */
 async function sendMessage(text) {
   if (!text) return;
-  
-  // Render user bubble
+
   const userBubble = bubble("user");
   const userMd = el("div", "markdown-content");
-  if (typeof marked !== "undefined" && marked.parse) {
-    userMd.innerHTML = marked.parse(text);
-  } else {
-    userMd.textContent = text;
-  }
+  userMd.innerHTML = marked.parse(text);
   userBubble.appendChild(userMd);
 
   // Render thinking indicator
@@ -664,6 +1036,9 @@ document.querySelectorAll(".chip").forEach(chip => {
     if (msg) sendMessage(msg);
   });
 });
+
+// Initial load of projects in sidebar
+loadProjects();
 </script>
 </body>
 </html>

@@ -205,6 +205,30 @@ async def chat(req: Request):
     return JSONResponse({"parts": parts})
 
 
+PROJECT_ID = "qwiklabs-gcp-04-0d49d311856f"
+
+
+@app.get("/api/projects")
+async def get_projects():
+    """Retrieve all SDLC projects and their GO / NO-GO release gate readiness from Firestore."""
+    try:
+        from google.cloud import firestore
+
+        db = firestore.Client(project=PROJECT_ID)
+        docs = db.collection("sdlc_projects").stream()
+        projects = []
+        for doc in docs:
+            p = doc.to_dict()
+            p["id"] = doc.id
+            projects.append(p)
+        # If no projects in collection yet, return default catalog
+        if not projects:
+            return JSONResponse({"projects": []})
+        return JSONResponse({"projects": projects})
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e), "projects": []})
+
+
 # Serve the chat UI (keep this mount last so /chat wins).
 app.mount("/", StaticFiles(directory="static", html=True), name="static")
 
