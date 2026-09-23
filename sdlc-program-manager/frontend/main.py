@@ -229,6 +229,37 @@ async def get_projects():
         return JSONResponse(status_code=500, content={"error": str(e), "projects": []})
 
 
+@app.get("/api/projects/{project_id}/tasks")
+async def get_project_tasks(project_id: str):
+    """Retrieve all SDLC tasks belonging to a specific project from Firestore."""
+    try:
+        from google.cloud import firestore
+
+        db = firestore.Client(project=PROJECT_ID)
+        tasks = []
+        # Query tasks where project_id equals project_id
+        docs = db.collection("sdlc_tasks").where("project_id", "==", project_id).stream()
+        for doc in docs:
+            t = doc.to_dict()
+            t["id"] = doc.id
+            tasks.append(t)
+
+        # Fallback if no tasks explicitly tagged with project_id
+        if not tasks and project_id == "proj-payments":
+            all_docs = db.collection("sdlc_tasks").stream()
+            for doc in all_docs:
+                t = doc.to_dict()
+                t["id"] = doc.id
+                if t.get("project_id") in [None, "proj-payments"]:
+                    tasks.append(t)
+
+        # Sort tasks by ID
+        tasks.sort(key=lambda x: x.get("id", ""))
+        return JSONResponse({"tasks": tasks})
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e), "tasks": []})
+
+
 # Serve the chat UI (keep this mount last so /chat wins).
 app.mount("/", StaticFiles(directory="static", html=True), name="static")
 

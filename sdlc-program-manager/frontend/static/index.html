@@ -187,13 +187,23 @@
   .project-summary-panel {
     background: #ffffff;
     border-bottom: 2px solid var(--border);
-    padding: 1rem 1.4rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    padding: 0.9rem 1.4rem 1.2rem 1.4rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
     display: none;
-    max-height: 280px;
+    max-height: 64vh;
     overflow-y: auto;
     animation: slideDown 0.2s ease-out;
     z-index: 5;
+  }
+  .project-summary-panel::-webkit-scrollbar {
+    width: 6px;
+  }
+  .project-summary-panel::-webkit-scrollbar-track {
+    background: #f1f5f9;
+  }
+  .project-summary-panel::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
   }
   @keyframes slideDown {
     from { opacity: 0; transform: translateY(-8px); }
@@ -203,7 +213,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.4rem;
   }
   .summary-title-wrap {
     display: flex;
@@ -232,14 +242,14 @@
   .summary-desc {
     font-size: 0.85rem;
     color: #475569;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.65rem;
     line-height: 1.4;
   }
   .summary-sections-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 0.85rem;
-    margin-top: 0.4rem;
+    margin-top: 0.3rem;
   }
   .summary-card-box {
     background: #f8fafc;
@@ -271,6 +281,55 @@
     gap: 0.25rem;
     color: #334155;
   }
+
+  /* Tasks Table beneath top part */
+  .summary-tasks-section {
+    margin-top: 0.85rem;
+    border-top: 1px solid var(--border);
+    padding-top: 0.65rem;
+  }
+  .tasks-table-title {
+    font-weight: 700;
+    font-size: 0.88rem;
+    color: #334155;
+    margin-bottom: 0.45rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .tasks-table-container {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #fff;
+  }
+  .tasks-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+    text-align: left;
+  }
+  .tasks-table th {
+    background: #f1f5f9;
+    color: #475569;
+    padding: 0.5rem 0.65rem;
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .tasks-table td {
+    padding: 0.45rem 0.65rem;
+    border-bottom: 1px solid #f1f5f9;
+    color: #1e293b;
+    vertical-align: middle;
+  }
+  .tasks-table tr:last-child td {
+    border-bottom: none;
+  }
+  .tasks-table tr:hover {
+    background: #fafafa;
+  }
+
   .ask-agent-chip-btn {
     display: inline-flex;
     align-items: center;
@@ -464,12 +523,13 @@
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
-    padding: 0.2rem 0.6rem;
+    padding: 0.18rem 0.55rem;
     border-radius: 12px;
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.025em;
+    white-space: nowrap;
   }
   .badge-status.completed {
     background: #dcfce7;
@@ -496,11 +556,12 @@
   .badge-priority {
     display: inline-flex;
     align-items: center;
-    padding: 0.15rem 0.5rem;
+    padding: 0.12rem 0.45rem;
     border-radius: 6px;
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     font-weight: 700;
     text-transform: uppercase;
+    white-space: nowrap;
   }
   .badge-priority.critical {
     background: #7f1d1d;
@@ -647,6 +708,37 @@
         </div>
       </div>
 
+      <!-- Tasks Table beneath top part -->
+      <div class="summary-tasks-section">
+        <div class="tasks-table-title">
+          <span style="display:flex; align-items:center; gap:0.35rem;">
+            <span class="material-symbols-outlined" style="font-size:1rem; color:var(--accent);">checklist</span>
+            Project Task Backlog & Gates
+          </span>
+          <span id="tasks-count-badge" style="font-size:0.75rem; color:var(--text-muted); font-weight:normal;">0 tasks</span>
+        </div>
+        <div class="tasks-table-container">
+          <table class="tasks-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Task Title</th>
+                <th>Stage</th>
+                <th>Status</th>
+                <th>Priority</th>
+                <th>Sub-Agent</th>
+                <th>Blockers</th>
+              </tr>
+            </thead>
+            <tbody id="summary-tasks-tbody">
+              <tr>
+                <td colspan="7" style="text-align:center; color:#64748b; padding:0.75rem;">Loading tasks...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <button id="ask-agent-about-project-btn" class="ask-agent-chip-btn">
           <span class="material-symbols-outlined" style="font-size:0.95rem;">chat</span>
@@ -707,6 +799,8 @@ const summaryScoreBadge = document.getElementById("summary-score-badge");
 const summaryDesc = document.getElementById("summary-desc");
 const summaryHoldingList = document.getElementById("summary-holding-list");
 const summaryNextstepsList = document.getElementById("summary-nextsteps-list");
+const summaryTasksTbody = document.getElementById("summary-tasks-tbody");
+const tasksCountBadge = document.getElementById("tasks-count-badge");
 const closeSummaryBtn = document.getElementById("close-summary-btn");
 const askAgentBtn = document.getElementById("ask-agent-about-project-btn");
 
@@ -779,13 +873,13 @@ function renderProjectsSidebar() {
   });
 }
 
-function selectProject(proj) {
+async function selectProject(proj) {
   activeProjectId = proj.id;
   document.querySelectorAll(".project-item").forEach(el => {
     el.classList.toggle("active", el.getAttribute("data-id") === proj.id);
   });
 
-  // Populate Summary Panel
+  // Populate Summary Panel Header
   summaryProjectName.textContent = proj.name;
   summaryDesc.textContent = proj.description || "";
   summaryScoreBadge.textContent = proj.completion_score ? `${proj.completion_score} complete` : "In Progress";
@@ -828,10 +922,103 @@ function selectProject(proj) {
   };
 
   projectSummaryPanel.style.display = "block";
+
+  // Load and render tasks table for this project
+  await loadProjectTasks(proj.id);
+}
+
+async function loadProjectTasks(projectId) {
+  summaryTasksTbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#64748b; padding:0.75rem;">Loading tasks...</td></tr>`;
+  tasksCountBadge.textContent = "...";
+
+  try {
+    const res = await fetch(`/api/projects/${projectId}/tasks`);
+    const data = await res.json();
+    const tasks = data.tasks || [];
+    renderProjectTasks(tasks);
+  } catch (err) {
+    console.error("Failed to fetch project tasks:", err);
+    summaryTasksTbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#dc2626; padding:0.75rem;">Failed to load project tasks</td></tr>`;
+    tasksCountBadge.textContent = "0 tasks";
+  }
+}
+
+function renderProjectTasks(tasks) {
+  summaryTasksTbody.innerHTML = "";
+  tasksCountBadge.textContent = `${tasks.length} task${tasks.length === 1 ? '' : 's'}`;
+
+  if (tasks.length === 0) {
+    summaryTasksTbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#64748b; padding:0.75rem;">No tasks logged for this project</td></tr>`;
+    return;
+  }
+
+  tasks.forEach(t => {
+    const tr = document.createElement("tr");
+
+    // ID
+    const tdId = el("td", "", t.id || "-");
+    tdId.style.fontWeight = "600";
+    tdId.style.color = "var(--accent)";
+
+    // Title & description preview
+    const tdTitle = el("td");
+    const titleText = el("div", "", t.title || "-");
+    titleText.style.fontWeight = "500";
+    tdTitle.appendChild(titleText);
+    if (t.description) {
+      const descText = el("div", "", t.description);
+      descText.style.fontSize = "0.74rem";
+      descText.style.color = "var(--text-muted)";
+      descText.style.marginTop = "2px";
+      tdTitle.appendChild(descText);
+    }
+
+    // Stage
+    const tdStage = el("td", "", t.stage || "-");
+
+    // Status
+    const tdStatus = el("td");
+    const st = (t.status || "Pending").toLowerCase();
+    const statusPill = el("span", `badge-status ${st.replace(/\s+/g, '-')}`, t.status || "Pending");
+    tdStatus.appendChild(statusPill);
+
+    // Priority
+    const tdPriority = el("td");
+    const prio = (t.priority || "Medium").toLowerCase();
+    const prioPill = el("span", `badge-priority ${prio}`, t.priority || "Medium");
+    tdPriority.appendChild(prioPill);
+
+    // Sub-agent
+    const tdAgent = el("td", "", t.sub_agent || "Unassigned");
+    tdAgent.style.color = "#475569";
+    tdAgent.style.fontSize = "0.76rem";
+
+    // Blockers
+    const tdBlockers = el("td");
+    const blockers = t.blockers || [];
+    if (blockers.length === 0) {
+      tdBlockers.innerHTML = `<span style="color:#16a34a; font-size:0.74rem;">None</span>`;
+    } else {
+      tdBlockers.innerHTML = `<span style="color:#dc2626; font-size:0.74rem; font-weight:500;">${blockers.join("; ")}</span>`;
+    }
+
+    tr.appendChild(tdId);
+    tr.appendChild(tdTitle);
+    tr.appendChild(tdStage);
+    tr.appendChild(tdStatus);
+    tr.appendChild(tdPriority);
+    tr.appendChild(tdAgent);
+    tr.appendChild(tdBlockers);
+
+    summaryTasksTbody.appendChild(tr);
+  });
 }
 
 refreshProjectsBtn.onclick = () => {
   loadProjects();
+  if (activeProjectId) {
+    loadProjectTasks(activeProjectId);
+  }
 };
 
 function bubble(role) {
@@ -982,6 +1169,9 @@ function renderReply(bubbleEl, parts) {
 
   // Refresh projects sidebar when agent finishes answering in case task/status changed
   loadProjects();
+  if (activeProjectId) {
+    loadProjectTasks(activeProjectId);
+  }
 }
 
 async function sendMessage(text) {
